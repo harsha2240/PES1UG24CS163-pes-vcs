@@ -139,6 +139,15 @@ int tree_from_index(ObjectID *id_out) {
         break;
 
     TreeEntry *e = &tree.entries[tree.count++];
+    const char *path = idx.entries[i].path;
+    const char *name = strrchr(path, '/');
+    name = name ? name + 1 : path;
+
+    strncpy(e->name, name, sizeof(e->name) - 1);
+    e->name[sizeof(e->name) - 1] = '\0';
+
+    e->hash = idx.entries[i].id;
+
 }
     Index idx;
     if (index_load(&idx) != 0) return -1;
