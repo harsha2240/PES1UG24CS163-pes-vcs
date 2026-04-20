@@ -67,7 +67,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     size_t total = header_len + len;
     unsigned char *buf = malloc(total);
     if (!buf) return -1;
-
+    //// Step 3: Copy header and data into buffer
     memcpy(buf, header, header_len);
     memcpy(buf + header_len, data, len);
 
