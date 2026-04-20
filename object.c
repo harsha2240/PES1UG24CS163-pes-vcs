@@ -1,5 +1,5 @@
 // object.c — Content-addressable object store
-
+//Extend CLI to support show and ls-tree commands
 #include "pes.h"
 #include <stdio.h>
 #include <stdlib.h>
