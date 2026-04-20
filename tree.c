@@ -8,7 +8,8 @@
 //
 // Example single entry (conceptual):
 //   "100644 hello.txt\0" followed by 32 raw bytes of SHA-256
-
+#include "pes.h"
+#include "index.h"
 #include "tree.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,29 +131,75 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 //
 // Returns 0 on success, -1 on error.
 int tree_from_index(ObjectID *id_out) {
-    // TODO: Implement recursive tree building
-    // (See Lab Appendix for logical steps)
     Index idx;
-    if (index_load(&idx) != 0) return -1;
+    if (index_load(&idx) != 0)
+        return -1;
+
     Tree tree;
-    tree.count = 0; 
+    tree.count = 0;
+
+    char dirs[MAX_TREE_ENTRIES][256];
+    int dir_count = 0;
+
     for (int i = 0; i < idx.count; i++) {
-    if (tree.count >= MAX_TREE_ENTRIES)
-        break;
+        const char *path = idx.entries[i].path;
 
-    TreeEntry *e = &tree.entries[tree.count++];
-    const char *path = idx.entries[i].path;
-    const char *name = strrchr(path, '/');
-    name = name ? name + 1 : path;
+        const char *slash = strchr(path, '/');
 
-    strncpy(e->name, name, sizeof(e->name) - 1);
-    e->name[sizeof(e->name) - 1] = '\0';
+        // 🔹 Handle directories
+        if (slash != NULL) {
+            int len = slash - path;
 
-    e->hash = idx.entries[i].id;
-    e->mode = get_file_mode(path);
-}
-   
-     if (tree.count == 0)
+            char dir[256];
+            strncpy(dir, path, len);
+            dir[len] = '\0';
+
+            int exists = 0;
+            for (int j = 0; j < dir_count; j++) {
+                if (strcmp(dirs[j], dir) == 0) {
+                    exists = 1;
+                    break;
+                }
+            }
+
+            if (!exists && dir_count < MAX_TREE_ENTRIES) {
+                strcpy(dirs[dir_count++], dir);
+            }
+
+            continue;
+        }
+
+        // 🔹 Handle files
+        if (tree.count >= MAX_TREE_ENTRIES)
+            break;
+
+        TreeEntry *e = &tree.entries[tree.count++];
+
+        const char *name = path;
+
+        strncpy(e->name, name, sizeof(e->name) - 1);
+        e->name[sizeof(e->name) - 1] = '\0';
+
+        e->hash = idx.entries[i].hash;
+        e->mode = get_file_mode(path);
+    }
+
+    // 🔹 Add directory entries
+    for (int i = 0; i < dir_count; i++) {
+        if (tree.count >= MAX_TREE_ENTRIES)
+            break;
+
+        TreeEntry *e = &tree.entries[tree.count++];
+
+        strncpy(e->name, dirs[i], sizeof(e->name) - 1);
+        e->name[sizeof(e->name) - 1] = '\0';
+
+        e->mode = MODE_DIR;
+
+        memset(e->hash.hash, 0, HASH_SIZE); // placeholder
+    }
+
+    if (tree.count == 0)
         return -1;
 
     void *data;
