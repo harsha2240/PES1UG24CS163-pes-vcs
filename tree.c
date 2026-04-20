@@ -132,6 +132,8 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 int tree_from_index(ObjectID *id_out) {
     // TODO: Implement recursive tree building
     // (See Lab Appendix for logical steps)
+    Index idx;
+    if (index_load(&idx) != 0) return -1;
     Tree tree;
     tree.count = 0; 
     for (int i = 0; i < idx.count; i++) {
@@ -149,6 +151,21 @@ int tree_from_index(ObjectID *id_out) {
     e->hash = idx.entries[i].id;
     e->mode = get_file_mode(path);
 }
-    Index idx;
-    if (index_load(&idx) != 0) return -1;
+   
+     if (tree.count == 0)
+        return -1;
+
+    void *data;
+    size_t len;
+
+    if (tree_serialize(&tree, &data, &len) != 0)
+        return -1;
+
+    if (object_write(OBJ_TREE, data, len, id_out) != 0) {
+        free(data);
+        return -1;
+    }
+
+    free(data);
+    return 0;
 }
