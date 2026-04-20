@@ -77,7 +77,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
 
     if (id_out) *id_out = id;
 
-    // Deduplication
+    // // Step 5: Check if object already exists to avoid duplicate storage
     if (object_exists(&id)) {
         free(buf);
         return 0;
