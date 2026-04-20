@@ -147,7 +147,7 @@ int tree_from_index(ObjectID *id_out) {
     e->name[sizeof(e->name) - 1] = '\0';
 
     e->hash = idx.entries[i].id;
-
+    e->mode = get_file_mode(path);
 }
     Index idx;
     if (index_load(&idx) != 0) return -1;
