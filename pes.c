@@ -1,5 +1,5 @@
 // pes.c — CLI entry point and command dispatch
-//
+//Fix commit format to match parser and enable log traversal
 // This file is PROVIDED. Do not modify.
 
 #include "pes.h"
