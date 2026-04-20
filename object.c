@@ -71,7 +71,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     memcpy(buf, header, header_len);
     memcpy(buf + header_len, data, len);
 
-    // Compute hash
+    // Step 4: Compute SHA-256 hash of full object (header + data)
     ObjectID id;
     compute_hash(buf, total, &id);
 
