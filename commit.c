@@ -202,4 +202,12 @@ char tree_hex[HASH_HEX_SIZE + 1];
 hash_to_hex(&tree_id, tree_hex);
 char buffer[4096];
 int offset = 0;
+const char *author = getenv("PES_AUTHOR");
+if (!author)
+    author = "PES User <pes@localhost>";
+
+offset += sprintf(buffer + offset, "tree %s\n", tree_hex);
+offset += sprintf(buffer + offset, "author %s\n", author);
+offset += sprintf(buffer + offset, "\n%s\n", message);
+
 }
