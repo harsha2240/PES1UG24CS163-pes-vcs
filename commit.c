@@ -14,6 +14,7 @@
 // PROVIDED functions: commit_parse, commit_serialize, commit_walk, head_read, head_update
 // TODO functions:     commit_create
 
+#include "pes.h"
 #include "commit.h"
 #include "index.h"
 #include "tree.h"
@@ -194,25 +195,36 @@ int head_update(const ObjectID *new_commit) {
 //
 // Returns 0 on success, -1 on error.
 int commit_create(const char *message, ObjectID *id_out) {
-    // TODO
-ObjectID tree_id;
-if (tree_from_index(&tree_id) != 0)
-    return -1;
-char tree_hex[HASH_HEX_SIZE + 1];
-hash_to_hex(&tree_id, tree_hex);
-char buffer[4096];
-int offset = 0;
-const char *author = getenv("PES_AUTHOR");
-if (!author)
-    author = "PES User <pes@localhost>";
+    // 1. Build tree from index
+    ObjectID tree_id;
+    if (tree_from_index(&tree_id) != 0)
+        return -1;
 
-offset += sprintf(buffer + offset, "tree %s\n", tree_hex);
-offset += sprintf(buffer + offset, "author %s\n", author);
-offset += sprintf(buffer + offset, "\n%s\n", message);
-if (object_write(OBJ_COMMIT, buffer, offset, id_out) != 0)
-    return -1;
+    // 2. Convert tree hash to hex
+    char tree_hex[HASH_HEX_SIZE + 1];
+    hash_to_hex(&tree_id, tree_hex);
 
-return 0;
+    // 3. Get author
+    const char *author = getenv("PES_AUTHOR");
+    if (!author)
+        author = "PES User <pes@localhost>";
 
+    // 4. Build commit content safely
+    char buffer[4096];
+    int offset = 0;
 
+    offset += snprintf(buffer + offset, sizeof(buffer) - offset,
+                       "tree %s\n", tree_hex);
+
+    offset += snprintf(buffer + offset, sizeof(buffer) - offset,
+                       "author %s\n", author);
+
+    offset += snprintf(buffer + offset, sizeof(buffer) - offset,
+                       "\n%s\n", message);
+
+    // 5. Write commit object
+    if (object_write(OBJ_COMMIT, buffer, offset, id_out) != 0)
+        return -1;
+
+    return 0;
 }
