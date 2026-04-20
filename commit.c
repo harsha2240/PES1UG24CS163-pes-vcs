@@ -209,5 +209,10 @@ if (!author)
 offset += sprintf(buffer + offset, "tree %s\n", tree_hex);
 offset += sprintf(buffer + offset, "author %s\n", author);
 offset += sprintf(buffer + offset, "\n%s\n", message);
+if (object_write(OBJ_COMMIT, buffer, offset, id_out) != 0)
+    return -1;
+
+return 0;
+
 
 }
