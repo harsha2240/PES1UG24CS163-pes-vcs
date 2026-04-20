@@ -127,6 +127,5 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Run 'pes' with no arguments for usage.\n");
         return 1;
     }
-
-    return 0;
+return 0;
 }
