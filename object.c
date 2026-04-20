@@ -63,7 +63,7 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     // Build header
     char header[64];
     int header_len = snprintf(header, sizeof(header), "%s %zu", type_str, len) + 1;
-
+    //// Step 2: Allocate buffer for header + data
     size_t total = header_len + len;
     unsigned char *buf = malloc(total);
     if (!buf) return -1;
