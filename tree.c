@@ -134,6 +134,12 @@ int tree_from_index(ObjectID *id_out) {
     // (See Lab Appendix for logical steps)
     Tree tree;
     tree.count = 0; 
+    for (int i = 0; i < idx.count; i++) {
+    if (tree.count >= MAX_TREE_ENTRIES)
+        break;
+
+    TreeEntry *e = &tree.entries[tree.count++];
+}
     Index idx;
     if (index_load(&idx) != 0) return -1;
 }
